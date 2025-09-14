@@ -5,132 +5,729 @@
 <title>网络急诊室 | 一键检测 & 修复</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;margin:0;padding:0;background:#f5f5f5;color:#333}
-header{background:#ff5a5f;color:#fff;padding:1rem;text-align:center;font-size:1.3rem}
-section{background:#fff;margin:.8rem;padding:1rem;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-h2{margin-top:0;font-size:1.1rem}
-button{cursor:pointer;background:#ff5a5f;color:#fff;border:0;padding:.5rem .8rem;border-radius:4px;margin:.2rem}
-button:hover{background:#e04a50}
-pre{background:#f8f8f8;padding:.8rem;border-left:4px solid #ff5a5f;overflow-x:auto;font-size:.9rem}
-.ok{color:green}.fail{color:#d00}.info{color:#058}
-#report{font-size:.85rem}
+:root {
+  --primary: #ff5a5f;
+  --primary-dark: #e04a50;
+  --secondary: #4687ff;
+  --light: #f5f5f5;
+  --dark: #333;
+  --gray: #777;
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #17a2b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--light);
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+header {
+  background: var(--primary);
+  color: #fff;
+  padding: 1.2rem;
+  text-align: center;
+  font-size: 1.4rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.card {
+  background: #fff;
+  margin-bottom: 1.2rem;
+  padding: 1.2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-title {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  flex: 1;
+  min-width: 120px;
+}
+
+button {
+  cursor: pointer;
+  background: var(--primary);
+  color: #fff;
+  border: 0;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  font-family: inherit;
+  font-weight: 500;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+button:hover {
+  background: var(--primary-dark);
+}
+
+button.secondary {
+  background: var(--secondary);
+}
+
+button.secondary:hover {
+  background: #3a75e0;
+}
+
+pre {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-left: 4px solid var(--primary);
+  overflow-x: auto;
+  font-size: 0.9rem;
+  border-radius: 0 4px 4px 0;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.status {
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.status.info {
+  background: #e8f4fd;
+  color: var(--info);
+  border-left: 4px solid var(--info);
+}
+
+.status.success {
+  background: #f0f9f0;
+  color: var(--success);
+  border-left: 4px solid var(--success);
+}
+
+.status.error {
+  background: #fdf3f3;
+  color: var(--danger);
+  border-left: 4px solid var(--danger);
+}
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.flex-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: var(--gray);
+  cursor: help;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: var(--dark);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.copy-btn {
+  background: var(--gray);
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.copy-btn:hover {
+  background: #666;
+}
+
+@media (max-width: 768px) {
+  .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  input {
+    width: 100%;
+  }
+}
 </style>
 </head>
 <body>
 <header>🚑 网络急诊室 · 一键检测 & 修复</header>
 
-<section>
-  <h2>① 本地网络快照</h2>
-  <button onclick="snap()">刷新</button>
-  <pre id="snap"></pre>
-</section>
+<div class="container">
+  <section class="card">
+    <h2 class="card-title"><span class="card-number">1</span> 本地网络快照</h2>
+    <div class="input-group">
+      <button onclick="snap()" id="snapBtn">刷新网络状态</button>
+    </div>
+    <div id="snapStatus" class="status info"></div>
+    <pre id="snap"></pre>
+  </section>
 
-<section>
-  <h2>② 端口探测</h2>
-  <input id="host" value="117.157.111.25" placeholder="域名/IP">
-  <input id="port" value="18080" placeholder="端口" style="width:80px">
-  <button onclick="portTest()">检测</button>
-  <pre id="portRes"></pre>
-</section>
+  <section class="card">
+    <h2 class="card-title"><span class="card-number">2</span> 端口探测</h2>
+    <div class="input-group">
+      <input id="host" value="www.example.com" placeholder="域名/IP">
+      <input id="port" value="80" placeholder="端口" style="width:100px">
+      <button onclick="portTest()" id="portBtn">检测端口</button>
+    </div>
+    <div id="portStatus" class="status info"></div>
+    <pre id="portRes"></pre>
+  </section>
 
-<section>
-  <h2>③ 路由追踪（WebAssembly）</h2>
-  <input id="traceHost" value="117.157.111.25">
-  <button onclick="traceRun()">追踪</button>
-  <pre id="traceRes"></pre>
-</section>
+  <section class="card">
+    <h2 class="card-title"><span class="card-number">3</span> 路由追踪</h2>
+    <div class="input-group">
+      <input id="traceHost" value="www.example.com" placeholder="域名/IP">
+      <button onclick="traceRun()" id="traceBtn">开始追踪</button>
+    </div>
+    <div id="traceStatus" class="status info"></div>
+    <pre id="traceRes"></pre>
+  </section>
 
-<section>
-  <h2>④ DNS 对比</h2>
-  <input id="dnsHost" value="github.com">
-  <button onclick="dnsTest()">解析</button>
-  <pre id="dnsRes"></pre>
-</section>
+  <section class="card">
+    <h2 class="card-title"><span class="card-number">4</span> DNS 对比 
+      <span class="tooltip">ℹ️
+        <span class="tooltiptext">对比不同DNS服务商的解析结果，检测DNS污染或配置问题</span>
+      </span>
+    </h2>
+    <div class="input-group">
+      <input id="dnsHost" value="github.com" placeholder="域名">
+      <button onclick="dnsTest()" id="dnsBtn">解析对比</button>
+    </div>
+    <div id="dnsStatus" class="status info"></div>
+    <pre id="dnsRes"></pre>
+  </section>
 
-<section>
-  <h2>⑤ 本地监听自测</h2>
-  <button onclick="listenTest()">扫描 18080</button>
-  <pre id="listenRes"></pre>
-</section>
+  <section class="card">
+    <h2 class="card-title"><span class="card-number">5</span> 本地监听自测</h2>
+    <div class="input-group">
+      <input id="listenPort" value="8080" placeholder="端口" style="width:100px">
+      <button onclick="listenTest()" id="listenBtn">检测端口监听</button>
+    </div>
+    <div id="listenStatus" class="status info"></div>
+    <pre id="listenRes"></pre>
+  </section>
 
-<section>
-  <h2>⑥ 生成修复脚本</h2>
-  <button onclick="genFix()">一键生成</button>
-  <pre id="fixCmd"></pre>
-</section>
+  <section class="card">
+    <h2 class="card-title"><span class="card-number">6</span> 生成修复脚本</h2>
+    <div class="input-group">
+      <input id="fixPort" value="8080" placeholder="端口" style="width:100px">
+      <button onclick="genFix()" id="fixBtn">生成脚本</button>
+      <button onclick="copyFw()" class="secondary">复制防火墙命令</button>
+    </div>
+    <div id="fixStatus" class="status info"></div>
+    <pre id="fixCmd"></pre>
+  </section>
 
-<section>
-  <h2>⑦ 完整报告</h2>
-  <button onclick="copyReport()">复制报告</button>
-  <pre id="report"></pre>
-</section>
+  <section class="card">
+    <h2 class="card-title"><span class="card-number">7</span> 完整报告</h2>
+    <div class="input-group">
+      <button onclick="generateReport()" class="secondary">生成报告</button>
+      <button onclick="copyReport()">复制报告</button>
+      <button onclick="saveReport()" class="secondary">保存报告</button>
+    </div>
+    <div id="reportStatus" class="status info"></div>
+    <pre id="report"></pre>
+  </section>
+</div>
 
 <script>
-/* ====== 工具函数 ====== */
+// 工具函数
 const $ = q => document.querySelector(q);
-const log = (id, txt, cls = '') => $(id).innerHTML = cls ? `<span class="${cls}">${txt}</span>` : txt;
+const $$ = q => document.querySelectorAll(q);
+
+function showStatus(id, message, type = 'info') {
+  const el = $(id);
+  el.textContent = message;
+  el.className = `status ${type}`;
+  el.style.display = 'block';
+}
+
+function hideStatus(id) {
+  $(id).style.display = 'none';
+}
+
+function setLoading(button, isLoading) {
+  const btn = $(button);
+  if (isLoading) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> 处理中...';
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = btn.getAttribute('data-originaltext');
+  }
+}
+
+function saveTextToFile(text, filename) {
+  const blob = new Blob([text], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+}
+
 function copyToClipboard(str) {
   const ta = document.createElement('textarea');
-  ta.value = str; ta.style.position = 'fixed'; ta.select();
-  document.body.appendChild(ta); document.execCommand('copy'); document.body.removeChild(ta);
+  ta.value = str;
+  ta.style.position = 'fixed';
+  ta.style.opacity = 0;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
 }
 
-/* ====== ① 本地快照 ====== */
+// 存储原始按钮文本
+document.addEventListener('DOMContentLoaded', () => {
+  $$('button').forEach(btn => {
+    btn.setAttribute('data-originaltext', btn.innerHTML);
+  });
+});
+
+// ① 本地快照
 function snap() {
-  log('snap', '正在获取...', 'info');
+  const btn = '#snapBtn';
+  setLoading(btn, true);
+  showStatus('#snapStatus', '正在获取本地网络信息...', 'info');
+  
+  const results = [];
+  
+  // 获取公网IP
   fetch('https://api.ipify.org?format=json')
     .then(r => r.json())
-    .then(d => {
-      const txt = `本机公网 IP: ${d.ip}\n浏览器语言: ${navigator.language}\n在线状态: ✅`;
-      log('snap', txt, 'ok');
-      addReport('本地快照', txt);
+    .then(data => {
+      results.push(`公网 IP: ${data.ip}`);
+      
+      // 获取更多网络信息
+      return Promise.all([
+        fetch('https://ipapi.co/json/').then(r => r.json()),
+        fetch('https://httpbin.org/user-agent').then(r => r.json())
+      ]);
     })
-    .catch(e => log('snap', `获取 IP 失败: ${e}`, 'fail'));
-}
-
-/* ====== ② 端口探测 ====== */
-function portTest() {
-  const h = $('#host').value, p = $('#port').value;
-  log('portRes', `正在检测 ${h}:${p} ...`, 'info');
-  const t0 = performance.now();
-  fetch(`https://${h}:${p}/favicon.ico`, { mode: 'no-cors', cache: 'no-cache' })
-    .then(() => {
-      const ms = (performance.now() - t0).toFixed(0);
-      log('portRes', `✅ 端口开放！约 ${ms} ms`, 'ok');
-      addReport('端口', `${h}:${p} 开放`);
+    .then(([locationData, userAgentData]) => {
+      results.push(`地理位置: ${locationData.city || '未知'}, ${locationData.country_name || '未知'}`);
+      results.push(`网络运营商: ${locationData.org || '未知'}`);
+      results.push(`用户代理: ${userAgentData['user-agent']}`);
+      results.push(`浏览器语言: ${navigator.language}`);
+      results.push(`在线状态: ${navigator.onLine ? '✅ 在线' : '❌ 离线'}`);
+      results.push(`Cookie 启用: ${navigator.cookieEnabled ? '✅' : '❌'}`);
+      results.push(`Java 启用: ${navigator.javaEnabled() ? '✅' : '❌'}`);
+      
+      if (navigator.connection) {
+        const conn = navigator.connection;
+        results.push(`网络类型: ${conn.effectiveType || '未知'}`);
+        results.push(`下行速度: ${conn.downlink || '未知'} Mb/s`);
+        results.push(`RTT: ${conn.rtt || '未知'} ms`);
+      }
+      
+      const txt = results.join('\n');
+      $('#snap').textContent = txt;
+      showStatus('#snapStatus', '本地网络信息获取成功！', 'success');
+      addReport('本地网络快照', txt);
     })
-    .catch(() => {
-      log('portRes', '❌ 端口不通（超时或被拒绝）', 'fail');
-      $('#portRes').innerHTML += '<br><button onclick="copyFw()">复制防火墙放行命令</button>';
+    .catch(e => {
+      $('#snap').textContent = `获取网络信息失败: ${e.message}\n\n请检查网络连接或稍后重试。`;
+      showStatus('#snapStatus', '获取网络信息失败', 'error');
+    })
+    .finally(() => {
+      setLoading(btn, false);
+      setTimeout(() => hideStatus('#snapStatus'), 3000);
     });
 }
-function copyFw() {
+
+// ② 端口探测
+function portTest() {
+  const host = $('#host').value;
   const port = $('#port').value;
-  const win = `netsh advfirewall firewall add rule name=Open${port} dir=in action=allow protocol=TCP localport=${port}`;
-  const linux = `sudo ufw allow ${port}/tcp\n# 或\nsudo firewall-cmd --permanent --add-port=${port}/tcp && sudo firewall-cmd --reload`;
-  copyToClipboard(`=== Windows ===\n${win}\n\n=== Linux ===\n${linux}`);
-  alert('已复制放行命令！');
-}
-
-/* ====== ③ 路由追踪（简化）====== */
-async function traceRun() {
-  const host = $('#traceHost').value;
-  log('traceRes', '正在追踪...', 'info');
-  let str = '';
-  for (let ttl = 1; ttl <= 20; ttl++) {
-    try {
-      const t0 = performance.now();
-      await fetch(`https://${host}/favicon.ico`, { mode: 'no-cors', headers: { 'TTL-Fake': ttl } });
-    } catch (e) {
-      const ms = (performance.now() - t0).toFixed(0);
-      str += `${ttl.toString().padStart(2)}  ${ms} ms  ${e.message.includes('timeout') ? '*' : '到达'}\n`;
-      if (ttl > 10) break;
-    }
+  const btn = '#portBtn';
+  
+  if (!host || !port) {
+    showStatus('#portStatus', '请输入主机地址和端口号', 'error');
+    return;
   }
-  log('traceRes', str || '浏览器限制，仅示意', 'info');
-  addReport('路由', str);
+  
+  setLoading(btn, true);
+  showStatus('#portStatus', `正在检测端口 ${host}:${port} ...`, 'info');
+  
+  // 使用第三方服务进行端口检测
+  const t0 = performance.now();
+  
+  // 注意：由于浏览器安全限制，直接检测任意端口通常不可行
+  // 这里使用一个支持CORS的第三方API
+  fetch(`https://api.hackertarget.com/nmap/?q=${host}&ports=${port}`)
+    .then(response => response.text())
+    .then(data => {
+      const ms = (performance.now() - t0).toFixed(0);
+      if (data.includes('Error') || data.includes('API count exceeded')) {
+        throw new Error('API限制或错误，尝试直接连接...');
+      }
+      
+      $('#portRes').textContent = data || `端口 ${port} 状态未知`;
+      showStatus('#portStatus', `端口检测完成，耗时 ${ms} ms`, 'success');
+      addReport('端口检测', `目标: ${host}:${port}\n结果: ${data}`);
+    })
+    .catch(() => {
+      // 如果API失败，尝试直接连接（有限制）
+      fetch(`https://cors-anywhere.herokuapp.com/${host}:${port}`, {
+        method: 'HEAD',
+        mode: 'cors',
+        cache: 'no-cache'
+      })
+      .then(() => {
+        const ms = (performance.now() - t0).toFixed(0);
+        $('#portRes').textContent = `✅ 端口 ${port} 可能开放 (耗时 ${ms} ms)`;
+        showStatus('#portStatus', '端口可能开放', 'success');
+        addReport('端口检测', `目标: ${host}:${port}\n结果: 可能开放`);
+      })
+      .catch(() => {
+        $('#portRes').textContent = `❌ 端口 ${port} 可能关闭或无响应\n\n注意: 由于浏览器安全限制，此检测可能不准确。\n建议使用专业工具如nmap进行检测。`;
+        showStatus('#portStatus', '端口可能关闭', 'error');
+        addReport('端口检测', `目标: ${host}:${port}\n结果: 可能关闭或无响应`);
+        
+        // 提供防火墙命令按钮
+        $('#portRes').innerHTML += '\n\n<button onclick="copyFw()">复制防火墙放行命令</button>';
+      });
+    })
+    .finally(() => {
+      setLoading(btn, false);
+      setTimeout(() => hideStatus('#portStatus'), 3000);
+    });
 }
 
-/* ====== ④ DNS 对比 ====== */
+function copyFw() {
+  const port = $('#port').value || $('#fixPort').value || '8080';
+  const win = `netsh advfirewall firewall add rule name="OpenPort${port}" dir=in action=allow protocol=TCP localport=${port}`;
+  const linux = `sudo ufw allow ${port}/tcp\n# 或使用firewalld\nsudo firewall-cmd --permanent --add-port=${port}/tcp && sudo firewall-cmd --reload`;
+  const mac = `sudo pfctl -ef /etc/pf.conf\n# 在/etc/pf.conf中添加: pass in inet proto tcp from any to any port ${port}`;
+  
+  const txt = `# Windows\n${win}\n\n# Linux (UFW)\n${linux}\n\n# macOS\n${mac}`;
+  
+  $('#fixCmd').textContent = txt;
+  copyToClipboard(txt);
+  showStatus('#fixStatus', '防火墙命令已复制到剪贴板！', 'success');
+  setTimeout(() => hideStatus('#fixStatus'), 3000);
+}
+
+// ③ 路由追踪
+function traceRun() {
+  const host = $('#traceHost').value;
+  const btn = '#traceBtn';
+  
+  if (!host) {
+    showStatus('#traceStatus', '请输入目标主机地址', 'error');
+    return;
+  }
+  
+  setLoading(btn, true);
+  showStatus('#traceStatus', '正在追踪路由，这可能需要一些时间...', 'info');
+  
+  // 使用第三方API进行路由追踪
+  fetch(`https://api.hackertarget.com/mtr/?q=${host}`)
+    .then(response => response.text())
+    .then(data => {
+      if (data.includes('error') || data.includes('API count exceeded')) {
+        throw new Error('API限制或错误');
+      }
+      
+      $('#traceRes').textContent = data || '路由追踪完成，但未返回数据';
+      showStatus('#traceStatus', '路由追踪完成！', 'success');
+      addReport('路由追踪', `目标: ${host}\n结果:\n${data}`);
+    })
+    .catch(e => {
+      $('#traceRes').textContent = `路由追踪失败: ${e.message}\n\n由于浏览器限制，无法直接进行ICMP路由追踪。\n建议使用系统自带工具:\n- Windows: tracert ${host}\n- Linux/macOS: traceroute ${host}`;
+      showStatus('#traceStatus', '路由追踪失败', 'error');
+    })
+    .finally(() => {
+      setLoading(btn, false);
+      setTimeout(() => hideStatus('#traceStatus'), 3000);
+    });
+}
+
+// ④ DNS 对比
 function dnsTest() {
-  const host
+  const host = $('#dnsHost').value;
+  const btn = '#dnsBtn';
+  
+  if (!host) {
+    showStatus('#dnsStatus', '请输入要解析的域名', 'error');
+    return;
+  }
+  
+  setLoading(btn, true);
+  showStatus('#dnsStatus', '正在对比DNS解析结果...', 'info');
+  
+  const dnsServices = {
+    'Cloudflare': 'https://cloudflare-dns.com/dns-query',
+    'Google': 'https://dns.google/resolve',
+    'Quad9': 'https://dns.quad9.net:5053/dns-query',
+    'OpenDNS': 'https://dns.opendns.com/resolve'
+  };
+  
+  const results = [];
+  const promises = [];
+  
+  Object.entries(dnsServices).forEach(([name, url]) => {
+    const promise = fetch(`${url}?name=${host}&type=A`, {
+      headers: { 'Accept': 'application/dns-json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.Answer && data.Answer.length > 0) {
+        const answers = data.Answer.map(a => `${a.data} (TTL: ${a.TTL})`).join(', ');
+        results.push(`${name}: ${answers}`);
+      } else if (data.Answer) {
+        results.push(`${name}: 无记录`);
+      } else {
+        results.push(`${name}: 查询失败`);
+      }
+    })
+    .catch(() => {
+      results.push(`${name}: 请求失败`);
+    });
+    
+    promises.push(promise);
+  });
+  
+  // 添加系统DNS解析
+  promises.push(new Promise(resolve => {
+    // 尝试使用DNS over HTTPS作为备用
+    fetch(`https://cloudflare-dns.com/dns-query?name=${host}&type=A`, {
+      headers: { 'Accept': 'application/dns-json' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.Answer) {
+        const answers = data.Answer.map(a => a.data).join(', ');
+        results.push(`系统解析: ${answers} (通过Cloudflare DoH)`);
+      } else {
+        results.push('系统解析: 无法确定');
+      }
+      resolve();
+    })
+    .catch(() => {
+      results.push('系统解析: 失败');
+      resolve();
+    });
+  }));
+  
+  Promise.all(promises)
+    .then(() => {
+      $('#dnsRes').textContent = results.join('\n');
+      showStatus('#dnsStatus', 'DNS解析对比完成！', 'success');
+      addReport('DNS对比', `域名: ${host}\n结果:\n${results.join('\n')}`);
+    })
+    .catch(e => {
+      $('#dnsRes').textContent = `DNS对比失败: ${e.message}`;
+      showStatus('#dnsStatus', 'DNS对比失败', 'error');
+    })
+    .finally(() => {
+      setLoading(btn, false);
+      setTimeout(() => hideStatus('#dnsStatus'), 3000);
+    });
+}
+
+// ⑤ 本地监听测试
+function listenTest() {
+  const port = $('#listenPort').value;
+  const btn = '#listenBtn';
+  
+  if (!port) {
+    showStatus('#listenStatus', '请输入要检测的端口号', 'error');
+    return;
+  }
+  
+  setLoading(btn, true);
+  showStatus('#listenStatus', '正在检测本地端口...', 'info');
+  
+  // 由于浏览器安全限制，无法直接扫描本地端口
+  // 提供有用的命令和指导
+  const commands = {
+    'Windows': `netstat -ano | findstr :${port}`,
+    'Linux/macOS': `sudo lsof -i :${port} || sudo netstat -tulpn | grep :${port} || sudo ss -tulpn | grep :${port}`
+  };
+  
+  const txt = `由于浏览器限制，无法直接检测本地端口监听情况。\n\n请根据您的系统在终端中运行以下命令:\n\nWindows:\n${commands.Windows}\n\nLinux/macOS:\n${commands.Linux}\n\n如果命令有输出，表示该端口正在被监听。`;
+  
+  $('#listenRes').textContent = txt;
+  showStatus('#listenStatus', '请使用系统命令检测端口', 'info');
+  addReport('本地端口检测', `端口: ${port}\n建议命令:\n${JSON.stringify(commands, null, 2)}`);
+  
+  setLoading(btn, false);
+  setTimeout(() => hideStatus('#listenStatus'), 3000);
+}
+
+// ⑥ 生成修复脚本
+function genFix() {
+  const port = $('#fixPort').value || '8080';
+  const btn = '#fixBtn';
+  
+  setLoading(btn, true);
+  showStatus('#fixStatus', '正在生成修复脚本...', 'info');
+  
+  // 生成不同平台的修复脚本
+  const win = `@echo off\necho 检查端口${port}监听...\nnetstat -ano | findstr :${port} >nul\nif errorlevel 1 (\n  echo 端口${port}未被占用\n) else (\n  echo 端口${port}已被占用\n  echo 查找进程...\n  for /f "tokens=5" %%i in ('netstat -ano ^| findstr :${port} ^| findstr LISTENING') do taskkill /f /pid %%i\n  echo 已尝试终止占用进程\n)\necho 完成`;
+  
+  const linux = `#!/bin/bash\necho "检查端口${port}监听..."\nif sudo lsof -i :${port} || sudo netstat -tulpn | grep :${port} || sudo ss -tulpn | grep :${port}; then\n  echo "端口${port}已被占用"\n  read -p "是否终止占用进程? (y/N) " -n 1 -r\n  echo\n  if [[ $REPLY =~ ^[Yy]$ ]]; then\n    sudo fuser -k ${port}/tcp\n    echo "已尝试终止占用进程"\n  fi\nelse\n  echo "端口${port}未被占用"\nfi\necho "完成"`;
+  
+  const mac = `#!/bin/bash\necho "检查端口${port}监听..."\nif lsof -i :${port} || netstat -anv | grep .${port}; then\n  echo "端口${port}已被占用"\n  read -p "是否终止占用进程? (y/N) " -n 1 -r\n  echo\n  if [[ $REPLY =~ ^[Yy]$ ]]; then\n    sudo lsof -t -i tcp:${port} | xargs kill -9\n    echo "已尝试终止占用进程"\n  fi\nelse\n  echo "端口${port}未被占用"\nfi\necho "完成"`;
+  
+  const txt = `# Windows批处理脚本 (保存为 .bat 文件)\n${win}\n\n# Linux Bash脚本 (保存为 .sh 文件，运行: chmod +x script.sh && ./script.sh)\n${linux}\n\n# macOS Bash脚本 (保存为 .sh 文件，运行: chmod +x script.sh && ./script.sh)\n${mac}`;
+  
+  $('#fixCmd').textContent = txt;
+  showStatus('#fixStatus', '修复脚本生成成功！', 'success');
+  addReport('修复脚本', `端口: ${port}\n脚本:\n${txt}`);
+  
+  setLoading(btn, false);
+  setTimeout(() => hideStatus('#fixStatus'), 3000);
+}
+
+// ⑦ 报告功能
+let reportText = '';
+
+function addReport(section, content) {
+  reportText += `=== ${section} ===\n${content}\n\n`;
+}
+
+function generateReport() {
+  const date = new Date().toLocaleString('zh-CN');
+  const header = `网络急诊室诊断报告\n生成时间: ${date}\n\n`;
+  
+  $('#report').textContent = header + reportText;
+  showStatus('#reportStatus', '报告已生成！', 'success');
+  setTimeout(() => hideStatus('#reportStatus'), 3000);
+}
+
+function copyReport() {
+  if (!reportText) {
+    showStatus('#reportStatus', '请先生成报告内容', 'error');
+    return;
+  }
+  
+  const date = new Date().toLocaleString('zh-CN');
+  const header = `网络急诊室诊断报告\n生成时间: ${date}\n\n`;
+  
+  copyToClipboard(header + reportText);
+  showStatus('#reportStatus', '报告已复制到剪贴板！', 'success');
+  setTimeout(() => hideStatus('#reportStatus'), 3000);
+}
+
+function saveReport() {
+  if (!reportText) {
+    showStatus('#reportStatus', '请先生成报告内容', 'error');
+    return;
+  }
+  
+  const date = new Date().toLocaleString('zh-CN').replace(/[/:]/g, '-');
+  const filename = `网络诊断报告-${date}.txt`;
+  const header = `网络急诊室诊断报告\n生成时间: ${date}\n\n`;
+  
+  saveTextToFile(header + reportText, filename);
+  showStatus('#reportStatus', `报告已保存为 ${filename}`, 'success');
+  setTimeout(() => hideStatus('#reportStatus'), 3000);
+}
+
+// 页面加载后自动运行一次本地快照
+window.onload = () => {
+  snap();
+  // 保存按钮原始文本
+  $$('button').forEach(btn => {
+    btn.setAttribute('data-originaltext', btn.innerHTML);
+  });
+};
+</script>
+</body>
+</html>
